@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CUTLAB — محرر الفيديو</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <div class="brand">
+        CUTLAB
+        <span>محرر الفيديو</span>
+    </div>
+
+    <div class="top-actions">
+
+        <button id="undoBtn">
+            ↶ تراجع
+        </button>
+
+        <button id="redoBtn">
+            ↷ إعادة
+        </button>
+
+        <button id="exportBtn" class="export">
+            تصدير الفيديو
+        </button>
+
+    </div>
+
+</header>
+
+
+<main class="editor">
+
+    <!-- الشريط الجانبي -->
+
+    <aside class="sidebar">
+
+        <button class="tool active" data-tool="media">
+            <span>▣</span>
+            الوسائط
+        </button>
+
+        <button class="tool" data-tool="text">
+            <span>T</span>
+            النص
+        </button>
+
+        <button class="tool" data-tool="audio">
+            <span>♫</span>
+            الصوت
+        </button>
+
+        <button class="tool" data-tool="effects">
+            <span>✦</span>
+            المؤثرات
+        </button>
+
+        <button class="tool" data-tool="filters">
+            <span>◐</span>
+            الفلاتر
+        </button>
+
+        <button class="tool" data-tool="transitions">
+            <span>◆</span>
+            الانتقالات
+        </button>
+
+        <button class="tool" data-tool="speed">
+            <span>↯</span>
+            السرعة
+        </button>
+
+    </aside>
+
+
+    <!-- لوحة الأدوات -->
+
+    <section class="panel">
+
+        <div class="panel-title">
+            <h2 id="panelTitle">
+                الوسائط
+            </h2>
+        </div>
+
+
+        <div id="mediaPanel" class="tool-panel active">
+
+            <label class="upload-box">
+
+                <input
+                    type="file"
+                    id="videoInput"
+                    accept="video/*">
+
+                <div class="upload-icon">
+                    ＋
+                </div>
+
+                <strong>
+                    أضف فيديو
+                </strong>
+
+                <small>
+                    MP4 / MOV / WebM
+                </small>
+
+            </label>
+
+
+            <label class="upload-box small">
+
+                <input
+                    type="file"
+                    id="imageInput"
+                    accept="image/*">
+
+                <div class="upload-icon">
+                    🖼
+                </div>
+
+                <strong>
+                    أضف صورة
+                </strong>
+
+            </label>
+
+
+            <div id="mediaList"></div>
+
+        </div>
+
+
+        <div id="textPanel" class="tool-panel">
+
+            <button class="big-tool" id="addTextBtn">
+                ＋ إضافة نص
+            </button>
+
+            <label>
+                النص
+                <input
+                    id="textInput"
+                    type="text"
+                    placeholder="اكتب النص هنا">
+            </label>
+
+            <label>
+                حجم النص
+                <input
+                    id="textSize"
+                    type="range"
+                    min="20"
+                    max="100"
+                    value="45">
+            </label>
+
+        </div>
+
+
+        <div id="audioPanel" class="tool-panel">
+
+            <label class="upload-box small">
+
+                <input
+                    type="file"
+                    id="audioInput"
+                    accept="audio/*">
+
+                <div class="upload-icon">
+                    ♫
+                </div>
+
+                <strong>
+                    أضف صوت
+                </strong>
+
+            </label>
+
+        </div>
+
+
+        <div id="effectsPanel" class="tool-panel">
+
+            <button class="effect-btn" data-effect="none">
+                بدون مؤثر
+            </button>
+
+            <button class="effect-btn" data-effect="glitch">
+                Glitch
+            </button>
+
+            <button class="effect-btn" data-effect="shake">
+                Shake
+            </button>
+
+            <button class="effect-btn" data-effect="zoom">
+                Zoom
+            </button>
+
+            <button class="effect-btn" data-effect="blur">
+                Blur
+            </button>
+
+        </div>
+
+
+        <div id="filtersPanel" class="tool-panel">
+
+            <button class="filter-btn" data-filter="none">
+                طبيعي
+            </button>
+
+            <button class="filter-btn" data-filter="cinema">
+                سينمائي
+            </button>
+
+            <button class="filter-btn" data-filter="bw">
+                أبيض وأسود
+            </button>
+
+            <button class="filter-btn" data-filter="warm">
+                دافئ
+            </button>
+
+            <button class="filter-btn" data-filter="cool">
+                بارد
+            </button>
+
+        </div>
+
+
+        <div id="transitionsPanel" class="tool-panel">
+
+            <button
+                class="transition-btn"
+                data-transition="fade">
+
+                Fade
+                <small>تلاشي</small>
+
+            </button>
+
+            <button
+                class="transition-btn"
+                data-transition="slide">
+
+                Slide
+                <small>انزلاق</small>
+
+            </button>
+
+            <button
+                class="transition-btn"
+                data-transition="zoom">
+
+                Zoom
+                <small>تكبير</small>
+
+            </button>
+
+        </div>
+
+
+        <div id="speedPanel" class="tool-panel">
+
+            <button class="speed-btn" data-speed="0.25">
+                0.25x
+            </button>
+
+            <button class="speed-btn" data-speed="0.5">
+                0.5x
+            </button>
+
+            <button class="speed-btn" data-speed="1">
+                1x
+            </button>
+
+            <button class="speed-btn" data-speed="1.5">
+                1.5x
+            </button>
+
+            <button class="speed-btn" data-speed="2">
+                2x
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- منطقة المعاينة -->
+
+    <section class="workspace">
+
+        <div class="preview">
+
+            <div class="video-stage" id="videoStage">
+
+                <video
+                    id="previewVideo"
+                    playsinline>
+                </video>
+
+                <div
+                    id="textOverlay"
+                    class="text-overlay">
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- أدوات التشغيل -->
+
+        <div class="player-bar">
+
+            <span id="currentTime">
+                00:00
+            </span>
+
+            <input
+                id="seekBar"
+                type="range"
+                min="0"
+                max="100"
+                value="0">
+
+            <span id="duration">
+                00:00
+            </span>
+
+        </div>
+
+
+        <div class="controls">
+
+            <button id="rewind">
+                ↶
+            </button>
+
+            <button
+                id="playBtn"
+                class="play">
+
+                ▶
+
+            </button>
+
+            <button id="forward">
+                ↷
+            </button>
+
+            <button id="muteBtn">
+                🔊
+            </button>
+
+        </div>
+
+
+        <!-- التايم لاين -->
+
+        <section class="timeline">
+
+            <div class="timeline-header">
+
+                <strong>
+                    الخط الزمني
+                </strong>
+
+                <div>
+
+                    <button id="splitBtn">
+                        ✂ تقسيم
+                    </button>
+
+                    <button id="deleteBtn">
+                        حذف
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="timeline-track"
+                id="timelineTrack">
+
+                <div
+                    class="timeline-empty"
+                    id="timelineEmpty">
+
+                    اسحب فيديو إلى المشروع
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </section>
+
+</main>
+
+
+<div id="toast"></div>
+
+
+<script src="script.js"></script>
+
+</body>
+</html>
