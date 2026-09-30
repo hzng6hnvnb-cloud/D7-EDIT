@@ -1,380 +1,411 @@
-/* =====================================================
-   CUTLAB
-===================================================== */
+const videoInput = document.getElementById("videoInput");
+const imageInput = document.getElementById("imageInput");
+const audioInput = document.getElementById("audioInput");
 
-const videoInput =
-    document.getElementById("videoInput");
+const video = document.getElementById("video");
+const imagePreview = document.getElementById("imagePreview");
 
-const imageInput =
-    document.getElementById("imageInput");
+const emptyPreview = document.getElementById("emptyPreview");
+const textOverlay = document.getElementById("textOverlay");
 
-const audioInput =
-    document.getElementById("audioInput");
+const track = document.getElementById("track");
+const assetList = document.getElementById("assetList");
 
-const previewVideo =
-    document.getElementById("previewVideo");
+const playBtn = document.getElementById("play");
+const seek = document.getElementById("seek");
 
-const timelineTrack =
-    document.getElementById("timelineTrack");
+const currentTime = document.getElementById("currentTime");
+const totalTime = document.getElementById("totalTime");
 
-const timelineEmpty =
-    document.getElementById("timelineEmpty");
-
-const playBtn =
-    document.getElementById("playBtn");
-
-const seekBar =
-    document.getElementById("seekBar");
-
-const currentTime =
-    document.getElementById("currentTime");
-
-const duration =
-    document.getElementById("duration");
-
-const textOverlay =
-    document.getElementById("textOverlay");
-
-const toast =
-    document.getElementById("toast");
-
+const toast = document.getElementById("toast");
 
 let clips = [];
-
 let selectedClip = null;
 
-let currentFilter = "none";
-
 let currentEffect = "none";
-
+let currentFilter = "none";
 let currentSpeed = 1;
 
-let textValue = "";
+let history = [];
+let future = [];
 
 
-/* =====================================================
-   رسالة
-===================================================== */
+/* ======================================
+   الرسائل
+====================================== */
 
-function showToast(message) {
+function notify(text) {
 
-    toast.textContent =
-        message;
+    toast.textContent = text;
 
-    toast.classList.add(
-        "show"
-    );
+    toast.classList.add("show");
 
     setTimeout(() => {
-
-        toast.classList.remove(
-            "show"
-        );
-
+        toast.classList.remove("show");
     }, 1600);
 }
 
 
-/* =====================================================
+/* ======================================
+   الوقت
+====================================== */
+
+function formatTime(seconds) {
+
+    if (!Number.isFinite(seconds)) {
+        return "00:00";
+    }
+
+    const m =
+        Math.floor(seconds / 60)
+            .toString()
+            .padStart(2, "0");
+
+    const s =
+        Math.floor(seconds % 60)
+            .toString()
+            .padStart(2, "0");
+
+    return `${m}:${s}`;
+}
+
+
+/* ======================================
+   حفظ الحالة
+====================================== */
+
+function saveHistory() {
+
+    history.push(
+        JSON.stringify(
+            clips.map(c => ({
+                id: c.id,
+                name: c.name,
+                url: c.url,
+                type: c.type
+            }))
+        )
+    );
+
+    if (history.length > 30) {
+        history.shift();
+    }
+
+    future = [];
+}
+
+
+/* ======================================
    رفع الفيديو
-===================================================== */
+====================================== */
 
 videoInput.addEventListener(
     "change",
-    event => {
+    function () {
 
-        const file =
-            event.target.files[0];
+        const file = this.files[0];
 
         if (!file) return;
 
-
         const url =
-            URL.createObjectURL(
-                file
-            );
-
+            URL.createObjectURL(file);
 
         const clip = {
 
-            id:
-                Date.now(),
+            id: Date.now(),
 
-            name:
-                file.name,
+            name: file.name,
 
-            url:
-                url,
+            url: url,
 
-            file:
-                file,
+            type: "video",
 
-            type:
-                "video"
+            file: file
         };
 
+        saveHistory();
 
-        clips.push(
-            clip
-        );
+        clips.push(clip);
 
+        selectedClip = clip;
 
-        selectedClip =
-            clip;
+        renderAll();
 
+        loadClip(clip);
 
-        renderTimeline();
-
-
-        loadClip(
-            clip
-        );
-
-
-        showToast(
-            "تمت إضافة الفيديو"
-        );
+        notify("تمت إضافة الفيديو ✓");
     }
 );
 
 
-/* =====================================================
+/* ======================================
    رفع الصورة
-===================================================== */
+====================================== */
 
 imageInput.addEventListener(
     "change",
-    event => {
+    function () {
 
-        const file =
-            event.target.files[0];
+        const file = this.files[0];
 
         if (!file) return;
 
-
         const url =
-            URL.createObjectURL(
-                file
-            );
-
+            URL.createObjectURL(file);
 
         const clip = {
 
-            id:
-                Date.now(),
+            id: Date.now(),
 
-            name:
-                file.name,
+            name: file.name,
 
-            url:
-                url,
+            url: url,
 
-            file:
-                file,
+            type: "image",
 
-            type:
-                "image"
+            file: file
         };
 
+        saveHistory();
 
-        clips.push(
-            clip
-        );
+        clips.push(clip);
 
+        selectedClip = clip;
 
-        selectedClip =
-            clip;
+        renderAll();
 
+        loadClip(clip);
 
-        renderTimeline();
-
-
-        showToast(
-            "تمت إضافة الصورة"
-        );
+        notify("تمت إضافة الصورة ✓");
     }
 );
 
 
-/* =====================================================
-   رفع الصوت
-===================================================== */
+/* ======================================
+   الصوت
+====================================== */
 
 audioInput.addEventListener(
     "change",
-    event => {
+    function () {
 
-        const file =
-            event.target.files[0];
+        if (!this.files[0]) return;
 
-        if (!file) return;
-
-
-        showToast(
-            "تمت إضافة الصوت للمشروع"
-        );
+        notify("تمت إضافة الصوت ✓");
     }
 );
 
 
-/* =====================================================
+/* ======================================
    تحميل المقطع
-===================================================== */
+====================================== */
 
 function loadClip(clip) {
 
-    if (
-        clip.type !==
-        "video"
-    ) {
+    if (!clip) return;
 
-        return;
+    video.className = "";
+    video.style.filter = "";
+    video.style.transform = "";
+
+    imagePreview.style.display = "none";
+
+    emptyPreview.style.display = "none";
+
+    if (clip.type === "video") {
+
+        video.style.display = "block";
+
+        video.src = clip.url;
+
+        video.playbackRate =
+            currentSpeed;
+
+        video.load();
+
+    } else {
+
+        video.pause();
+
+        video.style.display = "none";
+
+        imagePreview.src =
+            clip.url;
+
+        imagePreview.style.display =
+            "block";
     }
 
-
-    previewVideo.src =
-        clip.url;
-
-
-    previewVideo.playbackRate =
-        currentSpeed;
-
-
-    previewVideo.load();
-
-
-    previewVideo.onloadedmetadata =
-        () => {
-
-            updateDuration();
-
-            seekBar.value = 0;
-        };
+    applyVisuals();
 }
 
 
-/* =====================================================
-   الخط الزمني
-===================================================== */
+/* ======================================
+   عرض الخط الزمني
+====================================== */
 
 function renderTimeline() {
 
-    if (!clips.length) {
+    track.innerHTML = "";
 
-        timelineTrack.innerHTML = `
+    clips.forEach(clip => {
 
-            <div class="timeline-empty">
+        const element =
+            document.createElement("div");
 
-                اسحب فيديو إلى المشروع
+        element.className =
+            "timeline-clip";
 
-            </div>
-        `;
+        if (
+            selectedClip &&
+            clip.id === selectedClip.id
+        ) {
+            element.classList.add(
+                "selected"
+            );
+        }
+
+        if (clip.type === "video") {
+
+            const v =
+                document.createElement("video");
+
+            v.src = clip.url;
+
+            v.muted = true;
+
+            element.appendChild(v);
+
+        } else {
+
+            const img =
+                document.createElement("img");
+
+            img.src = clip.url;
+
+            element.appendChild(img);
+        }
+
+        const name =
+            document.createElement("div");
+
+        name.className =
+            "timeline-name";
+
+        name.textContent =
+            clip.name;
+
+        element.appendChild(name);
+
+        element.onclick = () => {
+
+            selectedClip = clip;
+
+            renderTimeline();
+
+            loadClip(clip);
+        };
+
+        track.appendChild(element);
+    });
+
+    document.getElementById(
+        "clipCount"
+    ).textContent =
+        `${clips.length} مقطع`;
+}
+
+
+/* ======================================
+   قائمة الملفات
+====================================== */
+
+function renderAssets() {
+
+    assetList.innerHTML = "";
+
+    clips.forEach(clip => {
+
+        const item =
+            document.createElement("div");
+
+        item.className =
+            "asset";
+
+        const thumb =
+            document.createElement(
+                clip.type === "video"
+                    ? "video"
+                    : "img"
+            );
+
+        thumb.className =
+            "asset-thumb";
+
+        thumb.src =
+            clip.url;
+
+        if (clip.type === "video") {
+            thumb.muted = true;
+        }
+
+        const name =
+            document.createElement("div");
+
+        name.className =
+            "asset-name";
+
+        name.textContent =
+            clip.name;
+
+        item.appendChild(thumb);
+        item.appendChild(name);
+
+        item.onclick = () => {
+
+            selectedClip = clip;
+
+            renderTimeline();
+
+            loadClip(clip);
+        };
+
+        assetList.appendChild(item);
+    });
+}
+
+
+function renderAll() {
+
+    renderTimeline();
+
+    renderAssets();
+}
+
+
+/* ======================================
+   التشغيل
+====================================== */
+
+playBtn.onclick = () => {
+
+    if (!video.src) {
+
+        notify("أضف فيديو أولًا");
 
         return;
     }
 
+    if (video.paused) {
 
-    timelineTrack.innerHTML =
-        clips
-            .map(
-                clip => `
-
-                <div
-                    class="
-                        timeline-clip
-                        ${
-                            selectedClip &&
-                            selectedClip.id === clip.id
-                            ?
-                            "selected"
-                            :
-                            ""
-                        }
-                    "
-                    data-id="${clip.id}">
-
-                    ${
-                        clip.type === "video"
-                        ?
-                        `
-                        <video
-                            class="clip-preview"
-                            src="${clip.url}"
-                            muted>
-                        </video>
-                        `
-                        :
-                        `
-                        <img
-                            class="clip-preview"
-                            src="${clip.url}">
-                        `
-                    }
-
-                    <div class="clip-name">
-
-                        ${clip.name}
-
-                    </div>
-
-                </div>
-
-            `
-            )
-            .join("");
-
-
-    timelineTrack
-        .querySelectorAll(
-            ".timeline-clip"
-        )
-        .forEach(element => {
-
-            element.onclick =
-                () => {
-
-                    const id =
-                        Number(
-                            element.dataset.id
-                        );
-
-
-                    selectedClip =
-                        clips.find(
-                            clip =>
-                                clip.id === id
-                        );
-
-
-                    renderTimeline();
-
-
-                    loadClip(
-                        selectedClip
-                    );
-                };
-        });
-}
-
-
-/* =====================================================
-   تشغيل
-===================================================== */
-
-playBtn.onclick = () => {
-
-    if (
-        previewVideo.paused
-    ) {
-
-        previewVideo.play();
+        video.play();
 
         playBtn.textContent =
             "Ⅱ";
 
     } else {
 
-        previewVideo.pause();
+        video.pause();
 
         playBtn.textContent =
             "▶";
@@ -382,210 +413,138 @@ playBtn.onclick = () => {
 };
 
 
-previewVideo.addEventListener(
+video.addEventListener(
     "play",
     () => {
-
-        playBtn.textContent =
-            "Ⅱ";
+        playBtn.textContent = "Ⅱ";
     }
 );
 
 
-previewVideo.addEventListener(
+video.addEventListener(
     "pause",
     () => {
-
-        playBtn.textContent =
-            "▶";
+        playBtn.textContent = "▶";
     }
 );
 
 
-/* =====================================================
+/* ======================================
    الوقت
-===================================================== */
+====================================== */
 
-function formatTime(seconds) {
+video.addEventListener(
+    "loadedmetadata",
+    () => {
 
-    if (
-        !Number.isFinite(
-            seconds
-        )
-    ) {
-
-        return "00:00";
+        totalTime.textContent =
+            formatTime(video.duration);
     }
+);
 
 
-    const minutes =
-        Math.floor(
-            seconds / 60
-        );
-
-
-    const secondsPart =
-        Math.floor(
-            seconds % 60
-        );
-
-
-    return (
-
-        String(minutes)
-            .padStart(2,"0")
-
-        +
-
-        ":"
-
-        +
-
-        String(secondsPart)
-            .padStart(2,"0")
-    );
-}
-
-
-function updateDuration() {
-
-    duration.textContent =
-        formatTime(
-            previewVideo.duration
-        );
-}
-
-
-previewVideo.addEventListener(
+video.addEventListener(
     "timeupdate",
     () => {
 
         currentTime.textContent =
-            formatTime(
-                previewVideo.currentTime
-            );
+            formatTime(video.currentTime);
 
+        if (video.duration) {
 
-        if (
-            previewVideo.duration
-        ) {
-
-            seekBar.value =
+            seek.value =
                 (
-                    previewVideo.currentTime /
-                    previewVideo.duration
+                    video.currentTime /
+                    video.duration
                 ) * 100;
         }
     }
 );
 
 
-previewVideo.addEventListener(
-    "loadedmetadata",
-    updateDuration
-);
-
-
-/* =====================================================
+/* ======================================
    شريط التقدم
-===================================================== */
+====================================== */
 
-seekBar.addEventListener(
+seek.addEventListener(
     "input",
     () => {
 
-        if (
-            !previewVideo.duration
-        ) {
+        if (!video.duration) return;
 
-            return;
-        }
-
-
-        previewVideo.currentTime =
+        video.currentTime =
             (
-                Number(
-                    seekBar.value
-                ) / 100
-            )
-            *
-            previewVideo.duration;
+                Number(seek.value) /
+                100
+            ) *
+            video.duration;
     }
 );
 
 
-/* =====================================================
-   رجوع وتقديم
-===================================================== */
+/* ======================================
+   تقديم وتأخير
+====================================== */
 
 document.getElementById(
-    "rewind"
+    "back5"
 ).onclick = () => {
 
-    previewVideo.currentTime =
+    video.currentTime =
         Math.max(
             0,
-            previewVideo.currentTime - 5
+            video.currentTime - 5
         );
 };
 
 
 document.getElementById(
-    "forward"
+    "next5"
 ).onclick = () => {
 
-    previewVideo.currentTime =
+    video.currentTime =
         Math.min(
-            previewVideo.duration || 0,
-            previewVideo.currentTime + 5
+            video.duration || 0,
+            video.currentTime + 5
         );
 };
 
 
-/* =====================================================
-   كتم الصوت
-===================================================== */
+/* ======================================
+   الصوت
+====================================== */
 
 document.getElementById(
-    "muteBtn"
-).onclick = () => {
+    "mute"
+).onclick = function () {
 
-    previewVideo.muted =
-        !previewVideo.muted;
+    video.muted =
+        !video.muted;
 
-
-    document.getElementById(
-        "muteBtn"
-    ).textContent =
-        previewVideo.muted
-        ?
-        "🔇"
-        :
-        "🔊";
+    this.textContent =
+        video.muted
+            ? "🔇"
+            : "🔊";
 };
 
 
-/* =====================================================
+/* ======================================
    النص
-===================================================== */
+====================================== */
 
 document.getElementById(
-    "addTextBtn"
+    "addText"
 ).onclick = () => {
 
-    textValue =
+    const value =
         document.getElementById(
             "textInput"
         ).value;
 
-
     textOverlay.textContent =
-        textValue;
+        value || "عنوان جديد";
 
-
-    showToast(
-        "تمت إضافة النص"
-    );
+    notify("تمت إضافة النص ✓");
 };
 
 
@@ -593,10 +552,10 @@ document.getElementById(
     "textInput"
 ).addEventListener(
     "input",
-    event => {
+    function () {
 
         textOverlay.textContent =
-            event.target.value;
+            this.value;
     }
 );
 
@@ -605,63 +564,20 @@ document.getElementById(
     "textSize"
 ).addEventListener(
     "input",
-    event => {
+    function () {
 
         textOverlay.style.fontSize =
-            event.target.value
-            +
-            "px";
+            this.value + "px";
     }
 );
 
 
-/* =====================================================
-   الفلاتر
-===================================================== */
-
-document
-    .querySelectorAll(
-        ".filter-btn"
-    )
-    .forEach(button => {
-
-        button.onclick = () => {
-
-            currentFilter =
-                button.dataset.filter;
-
-
-            previewVideo.className =
-                "";
-
-
-            if (
-                currentFilter !==
-                "none"
-            ) {
-
-                previewVideo.classList.add(
-                    "filter-" +
-                    currentFilter
-                );
-            }
-
-
-            showToast(
-                "تم تطبيق الفلتر"
-            );
-        };
-    });
-
-
-/* =====================================================
+/* ======================================
    المؤثرات
-===================================================== */
+====================================== */
 
 document
-    .querySelectorAll(
-        ".effect-btn"
-    )
+    .querySelectorAll(".effect-card")
     .forEach(button => {
 
         button.onclick = () => {
@@ -669,41 +585,96 @@ document
             currentEffect =
                 button.dataset.effect;
 
+            applyVisuals();
 
-            previewVideo.classList.remove(
-                "effect-shake",
-                "effect-zoom",
-                "effect-blur",
-                "effect-glitch"
-            );
-
-
-            if (
-                currentEffect !==
-                "none"
-            ) {
-
-                previewVideo.classList.add(
-                    "effect-" +
-                    currentEffect
-                );
-            }
-
-
-            showToast(
-                "تم تطبيق المؤثر"
+            notify(
+                "تم تطبيق المؤثر ✓"
             );
         };
     });
 
 
-/* =====================================================
+/* ======================================
+   الفلاتر
+====================================== */
+
+document
+    .querySelectorAll(".filter-card")
+    .forEach(button => {
+
+        button.onclick = () => {
+
+            currentFilter =
+                button.dataset.filter;
+
+            applyVisuals();
+
+            notify(
+                "تم تطبيق الفلتر ✓"
+            );
+        };
+    });
+
+
+function applyVisuals() {
+
+    video.className = "";
+
+    let filter = "";
+
+    if (currentFilter === "cinema") {
+
+        filter =
+            "contrast(1.2) saturate(.85) brightness(.9)";
+    }
+
+    if (currentFilter === "bw") {
+
+        filter =
+            "grayscale(1)";
+    }
+
+    if (currentFilter === "warm") {
+
+        filter =
+            "sepia(.3) saturate(1.25)";
+    }
+
+    if (currentFilter === "cool") {
+
+        filter =
+            "hue-rotate(18deg) saturate(.9)";
+    }
+
+    if (currentFilter === "vivid") {
+
+        filter =
+            "saturate(1.7) contrast(1.1)";
+    }
+
+    video.style.filter =
+        filter;
+
+
+    if (
+        currentEffect !== "none"
+    ) {
+
+        video.classList.add(
+            "effect-" +
+            currentEffect
+        );
+    }
+}
+
+
+/* ======================================
    السرعة
-===================================================== */
+====================================== */
 
 document
     .querySelectorAll(
-        ".speed-btn"
+        ".speed-grid button"
     )
     .forEach(button => {
 
@@ -714,102 +685,164 @@ document
                     button.dataset.speed
                 );
 
-
-            previewVideo.playbackRate =
+            video.playbackRate =
                 currentSpeed;
 
-
-            showToast(
-                "السرعة: " +
-                currentSpeed +
-                "x"
+            notify(
+                `السرعة ${currentSpeed}×`
             );
         };
     });
 
 
-/* =====================================================
+/* ======================================
    الانتقالات
-===================================================== */
+====================================== */
 
 document
     .querySelectorAll(
-        ".transition-btn"
+        ".transition-item"
     )
     .forEach(button => {
 
         button.onclick = () => {
 
-            showToast(
-                "تم اختيار انتقال " +
-                button.dataset.transition
+            notify(
+                "تم اختيار الانتقال ✓"
             );
         };
     });
 
 
-/* =====================================================
-   تقسيم
-===================================================== */
+/* ======================================
+   الخصائص
+====================================== */
+
+function updateTransform() {
+
+    const scale =
+        Number(
+            document.getElementById(
+                "scale"
+            ).value
+        );
+
+    const rotate =
+        Number(
+            document.getElementById(
+                "rotate"
+            ).value
+        );
+
+    video.style.transform =
+        `scale(${scale / 100}) rotate(${rotate}deg)`;
+}
+
 
 document.getElementById(
-    "splitBtn"
-).onclick = () => {
+    "scale"
+).addEventListener(
+    "input",
+    updateTransform
+);
 
-    if (
-        !selectedClip ||
-        selectedClip.type !== "video"
-    ) {
 
-        showToast(
-            "حدد فيديو أولًا"
-        );
+document.getElementById(
+    "rotate"
+).addEventListener(
+    "input",
+    updateTransform
+);
 
-        return;
+
+/* ======================================
+   السطوع والتباين والتشبع
+====================================== */
+
+function updateColor() {
+
+    const brightness =
+        document.getElementById(
+            "brightness"
+        ).value;
+
+    const contrast =
+        document.getElementById(
+            "contrast"
+        ).value;
+
+    const saturation =
+        document.getElementById(
+            "saturation"
+        ).value;
+
+    let filter = `
+        brightness(${brightness}%)
+        contrast(${contrast}%)
+        saturate(${saturation}%)
+    `;
+
+    video.style.filter =
+        filter;
+}
+
+
+document.getElementById(
+    "brightness"
+).addEventListener(
+    "input",
+    updateColor
+);
+
+
+document.getElementById(
+    "contrast"
+).addEventListener(
+    "input",
+    updateColor
+);
+
+
+document.getElementById(
+    "saturation"
+).addEventListener(
+    "input",
+    updateColor
+);
+
+
+/* ======================================
+   مستوى الصوت
+====================================== */
+
+document.getElementById(
+    "volume"
+).addEventListener(
+    "input",
+    function () {
+
+        video.volume =
+            Number(this.value) / 100;
     }
+);
 
 
-    const current =
-        previewVideo.currentTime;
-
-
-    if (
-        current <= 0 ||
-        current >=
-        previewVideo.duration
-    ) {
-
-        showToast(
-            "حرّك المؤشر إلى مكان التقسيم"
-        );
-
-        return;
-    }
-
-
-    showToast(
-        "تم تحديد نقطة التقسيم"
-    );
-};
-
-
-/* =====================================================
+/* ======================================
    حذف
-===================================================== */
+====================================== */
 
 document.getElementById(
-    "deleteBtn"
+    "delete"
 ).onclick = () => {
 
     if (!selectedClip) {
 
-        showToast(
-            "حدد مقطعًا أولًا"
-        );
+        notify("حدد مقطعًا أولًا");
 
         return;
     }
 
+    saveHistory();
 
     clips =
         clips.filter(
@@ -818,190 +851,312 @@ document.getElementById(
                 selectedClip.id
         );
 
-
     selectedClip =
         clips[0] || null;
 
-
-    renderTimeline();
-
+    renderAll();
 
     if (selectedClip) {
 
         loadClip(
             selectedClip
         );
+
     } else {
 
-        previewVideo.removeAttribute(
-            "src"
-        );
+        video.pause();
 
-        previewVideo.load();
+        video.removeAttribute("src");
+
+        video.style.display =
+            "none";
+
+        imagePreview.style.display =
+            "none";
+
+        emptyPreview.style.display =
+            "flex";
     }
 
+    notify("تم حذف المقطع");
+};
 
-    showToast(
-        "تم حذف المقطع"
+
+/* ======================================
+   تقسيم
+====================================== */
+
+document.getElementById(
+    "split"
+).onclick = () => {
+
+    if (
+        !selectedClip ||
+        selectedClip.type !== "video"
+    ) {
+
+        notify(
+            "حدد فيديو أولًا"
+        );
+
+        return;
+    }
+
+    const point =
+        video.currentTime;
+
+    if (
+        point <= 0 ||
+        point >= video.duration
+    ) {
+
+        notify(
+            "ضع المؤشر داخل الفيديو"
+        );
+
+        return;
+    }
+
+    notify(
+        "تم تحديد نقطة التقسيم"
     );
 };
 
 
-/* =====================================================
-   التراجع والإعادة
-===================================================== */
+/* ======================================
+   تراجع
+====================================== */
 
 document.getElementById(
     "undoBtn"
 ).onclick = () => {
 
-    showToast(
-        "التراجع جاهز للعمليات القادمة"
+    if (!history.length) {
+
+        notify(
+            "لا يوجد شيء للتراجع"
+        );
+
+        return;
+    }
+
+    const previous =
+        JSON.parse(
+            history.pop()
+        );
+
+    future.push(
+        JSON.stringify(clips)
     );
+
+    clips =
+        previous.map(c => ({
+            ...c
+        }));
+
+    selectedClip =
+        clips[0] || null;
+
+    renderAll();
+
+    if (selectedClip) {
+        loadClip(selectedClip);
+    }
+
+    notify("تم التراجع");
 };
 
+
+/* ======================================
+   إعادة
+====================================== */
 
 document.getElementById(
     "redoBtn"
 ).onclick = () => {
 
-    showToast(
-        "الإعادة جاهزة للعمليات القادمة"
+    if (!future.length) {
+
+        notify(
+            "لا يوجد شيء للإعادة"
+        );
+
+        return;
+    }
+
+    const next =
+        JSON.parse(
+            future.pop()
+        );
+
+    history.push(
+        JSON.stringify(clips)
     );
+
+    clips =
+        next.map(c => ({
+            ...c
+        }));
+
+    selectedClip =
+        clips[0] || null;
+
+    renderAll();
+
+    if (selectedClip) {
+        loadClip(selectedClip);
+    }
+
+    notify("تمت الإعادة");
 };
 
 
-/* =====================================================
+/* ======================================
+   ملء الشاشة
+====================================== */
+
+document.getElementById(
+    "fullscreenBtn"
+).onclick = () => {
+
+    const frame =
+        document.getElementById(
+            "videoFrame"
+        );
+
+    if (
+        !document.fullscreenElement
+    ) {
+
+        frame.requestFullscreen();
+
+    } else {
+
+        document.exitFullscreen();
+    }
+};
+
+
+/* ======================================
+   معاينة
+====================================== */
+
+document.getElementById(
+    "previewBtn"
+).onclick = () => {
+
+    if (!video.src) {
+
+        notify(
+            "أضف فيديو للمعاينة"
+        );
+
+        return;
+    }
+
+    if (video.paused) {
+
+        video.play();
+
+        notify(
+            "بدأت المعاينة"
+        );
+
+    } else {
+
+        video.pause();
+
+        notify(
+            "توقفت المعاينة"
+        );
+    }
+};
+
+
+/* ======================================
    التصدير
-===================================================== */
+====================================== */
 
 document.getElementById(
     "exportBtn"
 ).onclick = () => {
 
-    showToast(
-        "التصدير يحتاج محرك معالجة فيديو"
+    if (!video.src) {
+
+        notify(
+            "أضف فيديو أولًا"
+        );
+
+        return;
+    }
+
+    notify(
+        "محرك التصدير المتقدم سيكون في الإصدار التالي"
     );
 };
 
 
-/* =====================================================
-   تبديل الأدوات
-===================================================== */
+/* ======================================
+   تبديل اللوحات
+====================================== */
 
-const panels = {
+const panelTitles = {
 
-    media:
-        document.getElementById(
-            "mediaPanel"
-        ),
-
-    text:
-        document.getElementById(
-            "textPanel"
-        ),
-
-    audio:
-        document.getElementById(
-            "audioPanel"
-        ),
-
-    effects:
-        document.getElementById(
-            "effectsPanel"
-        ),
-
-    filters:
-        document.getElementById(
-            "filtersPanel"
-        ),
-
-    transitions:
-        document.getElementById(
-            "transitionsPanel"
-        ),
-
-    speed:
-        document.getElementById(
-            "speedPanel"
-        )
-};
-
-
-const titles = {
-
-    media:
-        "الوسائط",
-
-    text:
-        "النص",
-
-    audio:
-        "الصوت",
-
-    effects:
-        "المؤثرات",
-
-    filters:
-        "الفلاتر",
-
-    transitions:
-        "الانتقالات",
-
-    speed:
-        "السرعة"
+    media: "الوسائط",
+    text: "النص",
+    audio: "الصوت",
+    effects: "المؤثرات",
+    filters: "الفلاتر",
+    transition: "الانتقالات",
+    speed: "السرعة"
 };
 
 
 document
-    .querySelectorAll(
-        ".tool"
-    )
-    .forEach(button => {
+    .querySelectorAll(".tool")
+    .forEach(tool => {
 
-        button.onclick = () => {
+        tool.addEventListener(
+            "click",
+            () => {
 
-            const tool =
-                button.dataset.tool;
+                const panel =
+                    tool.dataset.panel;
 
+                if (!panel) return;
 
-            document
-                .querySelectorAll(
-                    ".tool"
-                )
-                .forEach(
-                    b =>
-                        b.classList.remove(
+                document
+                    .querySelectorAll(".tool")
+                    .forEach(t =>
+                        t.classList.remove(
                             "active"
                         )
+                    );
+
+                tool.classList.add(
+                    "active"
                 );
 
-
-            button.classList.add(
-                "active"
-            );
-
-
-            Object.values(
-                panels
-            ).forEach(
-                panel =>
-                    panel.classList.remove(
-                        "active"
+                document
+                    .querySelectorAll(
+                        ".panel-content"
                     )
-            );
+                    .forEach(p =>
+                        p.classList.remove(
+                            "active"
+                        )
+                    );
 
+                document
+                    .getElementById(panel)
+                    .classList.add(
+                        "active"
+                    );
 
-            panels[
-                tool
-            ].classList.add(
-                "active"
-            );
-
-
-            document.getElementById(
-                "panelTitle"
-            ).textContent =
-                titles[tool];
-        };
+                document.getElementById(
+                    "panelTitle"
+                ).textContent =
+                    panelTitles[panel];
+            }
+        );
     });
