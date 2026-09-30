@@ -4,31 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>CUTLAB — محرر الفيديو</title>
+    <title>VANTA — محرر الفيديو</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<header class="topbar">
+<div class="background-glow glow-1"></div>
+<div class="background-glow glow-2"></div>
 
-    <div class="brand">
-        CUTLAB
-        <span>محرر الفيديو</span>
+<header class="topbar glass">
+
+    <div class="logo">
+        <div class="logo-mark">V</div>
+
+        <div>
+            <strong>VANTA</strong>
+            <small>استوديو الفيديو</small>
+        </div>
     </div>
 
-    <div class="top-actions">
+    <div class="project-name">
+        مشروعي الجديد
+        <span>● محفوظ</span>
+    </div>
 
-        <button id="undoBtn">
-            ↶ تراجع
+    <div class="top-buttons">
+
+        <button id="undoBtn">↶</button>
+        <button id="redoBtn">↷</button>
+
+        <button class="preview-btn" id="previewBtn">
+            ▶ معاينة
         </button>
 
-        <button id="redoBtn">
-            ↷ إعادة
-        </button>
-
-        <button id="exportBtn" class="export">
+        <button class="export-btn" id="exportBtn">
             تصدير الفيديو
         </button>
 
@@ -37,278 +48,436 @@
 </header>
 
 
-<main class="editor">
+<main class="app">
 
-    <!-- الشريط الجانبي -->
 
-    <aside class="sidebar">
+    <!-- الأدوات -->
 
-        <button class="tool active" data-tool="media">
+    <aside class="tools glass">
+
+        <button class="tool active" data-panel="media">
+
             <span>▣</span>
-            الوسائط
+            <small>الوسائط</small>
+
         </button>
 
-        <button class="tool" data-tool="text">
+        <button class="tool" data-panel="text">
+
             <span>T</span>
-            النص
+            <small>النص</small>
+
         </button>
 
-        <button class="tool" data-tool="audio">
+        <button class="tool" data-panel="audio">
+
             <span>♫</span>
-            الصوت
+            <small>الصوت</small>
+
         </button>
 
-        <button class="tool" data-tool="effects">
+        <button class="tool" data-panel="effects">
+
             <span>✦</span>
-            المؤثرات
+            <small>المؤثرات</small>
+
         </button>
 
-        <button class="tool" data-tool="filters">
+        <button class="tool" data-panel="filters">
+
             <span>◐</span>
-            الفلاتر
+            <small>الفلاتر</small>
+
         </button>
 
-        <button class="tool" data-tool="transitions">
-            <span>◆</span>
-            الانتقالات
+        <button class="tool" data-panel="transition">
+
+            <span>◇</span>
+            <small>انتقالات</small>
+
         </button>
 
-        <button class="tool" data-tool="speed">
+        <button class="tool" data-panel="speed">
+
             <span>↯</span>
-            السرعة
+            <small>السرعة</small>
+
         </button>
+
+        <div class="tool-bottom">
+
+            <button class="tool">
+                ⚙
+                <small>الإعدادات</small>
+            </button>
+
+        </div>
 
     </aside>
 
 
     <!-- لوحة الأدوات -->
 
-    <section class="panel">
+    <aside class="left-panel glass">
 
-        <div class="panel-title">
-            <h2 id="panelTitle">
-                الوسائط
-            </h2>
+        <div class="panel-heading">
+
+            <div>
+
+                <h2 id="panelTitle">
+                    الوسائط
+                </h2>
+
+                <span>
+                    أضف عناصر مشروعك
+                </span>
+
+            </div>
+
         </div>
 
 
-        <div id="mediaPanel" class="tool-panel active">
+        <!-- الوسائط -->
 
-            <label class="upload-box">
+        <section class="panel-content active" id="media">
+
+            <label class="upload-card">
 
                 <input
                     type="file"
                     id="videoInput"
-                    accept="video/*">
+                    accept="video/*"
+                >
 
-                <div class="upload-icon">
+                <div class="upload-symbol">
                     ＋
                 </div>
 
                 <strong>
-                    أضف فيديو
+                    إضافة فيديو
                 </strong>
 
-                <small>
-                    MP4 / MOV / WebM
-                </small>
+                <span>
+                    اسحب الفيديو هنا أو اختر ملفًا
+                </span>
 
             </label>
 
 
-            <label class="upload-box small">
+            <label class="upload-card compact">
 
                 <input
                     type="file"
                     id="imageInput"
-                    accept="image/*">
+                    accept="image/*"
+                >
 
-                <div class="upload-icon">
-                    🖼
+                <div class="upload-symbol">
+                    ▧
                 </div>
 
                 <strong>
-                    أضف صورة
+                    إضافة صورة
                 </strong>
 
             </label>
 
 
-            <div id="mediaList"></div>
+            <div class="section-label">
+                ملفات المشروع
+            </div>
 
-        </div>
+            <div id="assetList"></div>
+
+        </section>
 
 
-        <div id="textPanel" class="tool-panel">
+        <!-- النص -->
 
-            <button class="big-tool" id="addTextBtn">
+        <section class="panel-content" id="text">
+
+            <button class="add-big" id="addText">
                 ＋ إضافة نص
             </button>
 
-            <label>
-                النص
+            <div class="control">
+
+                <label>النص</label>
+
                 <input
                     id="textInput"
                     type="text"
-                    placeholder="اكتب النص هنا">
-            </label>
+                    placeholder="اكتب النص هنا"
+                >
 
-            <label>
-                حجم النص
+            </div>
+
+            <div class="control">
+
+                <label>حجم النص</label>
+
                 <input
                     id="textSize"
                     type="range"
                     min="20"
                     max="100"
-                    value="45">
-            </label>
+                    value="48"
+                >
 
-        </div>
+            </div>
+
+            <div class="text-presets">
+
+                <button>عنوان</button>
+                <button>عنوان كبير</button>
+                <button>سينمائي</button>
+
+            </div>
+
+        </section>
 
 
-        <div id="audioPanel" class="tool-panel">
+        <!-- الصوت -->
 
-            <label class="upload-box small">
+        <section class="panel-content" id="audio">
+
+            <label class="upload-card">
 
                 <input
                     type="file"
                     id="audioInput"
-                    accept="audio/*">
+                    accept="audio/*"
+                >
 
-                <div class="upload-icon">
+                <div class="upload-symbol">
                     ♫
                 </div>
 
                 <strong>
-                    أضف صوت
+                    إضافة موسيقى
                 </strong>
+
+                <span>
+                    MP3 / WAV / M4A
+                </span>
 
             </label>
 
-        </div>
+            <div class="audio-row">
+                🎵 الموسيقى الخاصة بك
+            </div>
+
+        </section>
 
 
-        <div id="effectsPanel" class="tool-panel">
+        <!-- المؤثرات -->
 
-            <button class="effect-btn" data-effect="none">
-                بدون مؤثر
+        <section class="panel-content" id="effects">
+
+            <div class="effects-grid">
+
+                <button
+                    class="effect-card"
+                    data-effect="none">
+
+                    <div>✦</div>
+                    <span>طبيعي</span>
+
+                </button>
+
+                <button
+                    class="effect-card"
+                    data-effect="glitch">
+
+                    <div>⚡</div>
+                    <span>تشويش</span>
+
+                </button>
+
+                <button
+                    class="effect-card"
+                    data-effect="shake">
+
+                    <div>〰</div>
+                    <span>اهتزاز</span>
+
+                </button>
+
+                <button
+                    class="effect-card"
+                    data-effect="zoom">
+
+                    <div>⌕</div>
+                    <span>تكبير</span>
+
+                </button>
+
+                <button
+                    class="effect-card"
+                    data-effect="blur">
+
+                    <div>◌</div>
+                    <span>ضباب</span>
+
+                </button>
+
+                <button
+                    class="effect-card"
+                    data-effect="pulse">
+
+                    <div>◉</div>
+                    <span>نبض</span>
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- الفلاتر -->
+
+        <section class="panel-content" id="filters">
+
+            <div class="filter-grid">
+
+                <button class="filter-card" data-filter="none">
+                    <div></div>
+                    <span>أصلي</span>
+                </button>
+
+                <button class="filter-card cinema" data-filter="cinema">
+                    <div></div>
+                    <span>سينمائي</span>
+                </button>
+
+                <button class="filter-card bw" data-filter="bw">
+                    <div></div>
+                    <span>أبيض وأسود</span>
+                </button>
+
+                <button class="filter-card warm" data-filter="warm">
+                    <div></div>
+                    <span>دافئ</span>
+                </button>
+
+                <button class="filter-card cool" data-filter="cool">
+                    <div></div>
+                    <span>بارد</span>
+                </button>
+
+                <button class="filter-card vivid" data-filter="vivid">
+                    <div></div>
+                    <span>حيوي</span>
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- الانتقالات -->
+
+        <section class="panel-content" id="transition">
+
+            <button class="transition-item" data-transition="fade">
+                <strong>تلاشي</strong>
+                <span>انتقال ناعم بين المقاطع</span>
             </button>
 
-            <button class="effect-btn" data-effect="glitch">
-                Glitch
+            <button class="transition-item" data-transition="slide">
+                <strong>انزلاق</strong>
+                <span>انتقال جانبي سريع</span>
             </button>
 
-            <button class="effect-btn" data-effect="shake">
-                Shake
+            <button class="transition-item" data-transition="zoom">
+                <strong>تكبير</strong>
+                <span>دخول سينمائي</span>
             </button>
 
-            <button class="effect-btn" data-effect="zoom">
-                Zoom
+            <button class="transition-item" data-transition="flash">
+                <strong>وميض</strong>
+                <span>انتقال سريع</span>
             </button>
 
-            <button class="effect-btn" data-effect="blur">
-                Blur
-            </button>
-
-        </div>
+        </section>
 
 
-        <div id="filtersPanel" class="tool-panel">
+        <!-- السرعة -->
 
-            <button class="filter-btn" data-filter="none">
-                طبيعي
-            </button>
+        <section class="panel-content" id="speed">
 
-            <button class="filter-btn" data-filter="cinema">
-                سينمائي
-            </button>
+            <div class="speed-title">
+                سرعة المقطع
+            </div>
 
-            <button class="filter-btn" data-filter="bw">
-                أبيض وأسود
-            </button>
+            <div class="speed-grid">
 
-            <button class="filter-btn" data-filter="warm">
-                دافئ
-            </button>
+                <button data-speed="0.25">0.25×</button>
+                <button data-speed="0.5">0.5×</button>
+                <button data-speed="1">1×</button>
+                <button data-speed="1.5">1.5×</button>
+                <button data-speed="2">2×</button>
+                <button data-speed="3">3×</button>
 
-            <button class="filter-btn" data-filter="cool">
-                بارد
-            </button>
+            </div>
 
-        </div>
+        </section>
 
-
-        <div id="transitionsPanel" class="tool-panel">
-
-            <button
-                class="transition-btn"
-                data-transition="fade">
-
-                Fade
-                <small>تلاشي</small>
-
-            </button>
-
-            <button
-                class="transition-btn"
-                data-transition="slide">
-
-                Slide
-                <small>انزلاق</small>
-
-            </button>
-
-            <button
-                class="transition-btn"
-                data-transition="zoom">
-
-                Zoom
-                <small>تكبير</small>
-
-            </button>
-
-        </div>
+    </aside>
 
 
-        <div id="speedPanel" class="tool-panel">
-
-            <button class="speed-btn" data-speed="0.25">
-                0.25x
-            </button>
-
-            <button class="speed-btn" data-speed="0.5">
-                0.5x
-            </button>
-
-            <button class="speed-btn" data-speed="1">
-                1x
-            </button>
-
-            <button class="speed-btn" data-speed="1.5">
-                1.5x
-            </button>
-
-            <button class="speed-btn" data-speed="2">
-                2x
-            </button>
-
-        </div>
-
-    </section>
-
-
-    <!-- منطقة المعاينة -->
+    <!-- مساحة المعاينة -->
 
     <section class="workspace">
 
-        <div class="preview">
+        <div class="workspace-top">
 
-            <div class="video-stage" id="videoStage">
+            <div class="resolution">
+                16:9
+            </div>
+
+            <div class="workspace-title">
+                المعاينة
+            </div>
+
+            <button id="fullscreenBtn">
+                ⛶
+            </button>
+
+        </div>
+
+
+        <div class="preview-area">
+
+            <div
+                class="video-frame"
+                id="videoFrame">
+
+                <div class="empty-preview" id="emptyPreview">
+
+                    <div class="empty-icon">
+                        ▶
+                    </div>
+
+                    <strong>
+                        أضف فيديو للبدء
+                    </strong>
+
+                    <span>
+                        مشروعك سيظهر هنا
+                    </span>
+
+                </div>
 
                 <video
-                    id="previewVideo"
+                    id="video"
                     playsinline>
                 </video>
+
+                <img
+                    id="imagePreview"
+                    alt="">
 
                 <div
                     id="textOverlay"
@@ -320,70 +489,75 @@
         </div>
 
 
-        <!-- أدوات التشغيل -->
+        <!-- التحكم -->
 
-        <div class="player-bar">
+        <div class="player">
 
             <span id="currentTime">
                 00:00
             </span>
 
             <input
-                id="seekBar"
+                id="seek"
                 type="range"
                 min="0"
                 max="100"
-                value="0">
+                value="0"
+            >
 
-            <span id="duration">
+            <span id="totalTime">
                 00:00
             </span>
 
         </div>
 
 
-        <div class="controls">
+        <div class="player-controls">
 
-            <button id="rewind">
-                ↶
+            <button id="back5">
+                ↶ 5
             </button>
 
-            <button
-                id="playBtn"
-                class="play">
-
+            <button id="play" class="main-play">
                 ▶
-
             </button>
 
-            <button id="forward">
-                ↷
+            <button id="next5">
+                5 ↷
             </button>
 
-            <button id="muteBtn">
+            <button id="mute">
                 🔊
             </button>
 
         </div>
 
 
-        <!-- التايم لاين -->
+        <!-- الخط الزمني -->
 
-        <section class="timeline">
+        <section class="timeline glass">
 
-            <div class="timeline-header">
-
-                <strong>
-                    الخط الزمني
-                </strong>
+            <div class="timeline-head">
 
                 <div>
 
-                    <button id="splitBtn">
+                    <strong>
+                        الخط الزمني
+                    </strong>
+
+                    <span id="clipCount">
+                        0 مقطع
+                    </span>
+
+                </div>
+
+                <div class="timeline-actions">
+
+                    <button id="split">
                         ✂ تقسيم
                     </button>
 
-                    <button id="deleteBtn">
+                    <button id="delete">
                         حذف
                     </button>
 
@@ -393,14 +567,24 @@
 
 
             <div
-                class="timeline-track"
-                id="timelineTrack">
+                class="timeline-body"
+                id="timeline">
+
+                <div class="timeline-ruler">
+
+                    <span>00:00</span>
+                    <span>00:05</span>
+                    <span>00:10</span>
+                    <span>00:15</span>
+                    <span>00:20</span>
+                    <span>00:25</span>
+                    <span>00:30</span>
+
+                </div>
 
                 <div
-                    class="timeline-empty"
-                    id="timelineEmpty">
-
-                    اسحب فيديو إلى المشروع
+                    class="track"
+                    id="track">
 
                 </div>
 
@@ -409,6 +593,152 @@
         </section>
 
     </section>
+
+
+    <!-- الخصائص -->
+
+    <aside class="properties glass">
+
+        <div class="property-title">
+
+            <strong>
+                الخصائص
+            </strong>
+
+            <span>
+                المقطع المحدد
+            </span>
+
+        </div>
+
+
+        <div class="property-section">
+
+            <div class="property-heading">
+                التحويل
+            </div>
+
+            <div class="two-columns">
+
+                <div>
+                    <span>الموضع الأفقي</span>
+                    <input id="posX" type="number" value="0">
+                </div>
+
+                <div>
+                    <span>الموضع العمودي</span>
+                    <input id="posY" type="number" value="0">
+                </div>
+
+            </div>
+
+
+            <div class="control">
+
+                <label>التكبير</label>
+
+                <input
+                    id="scale"
+                    type="range"
+                    min="50"
+                    max="150"
+                    value="100"
+                >
+
+            </div>
+
+
+            <div class="control">
+
+                <label>التدوير</label>
+
+                <input
+                    id="rotate"
+                    type="range"
+                    min="-180"
+                    max="180"
+                    value="0"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="property-section">
+
+            <div class="property-heading">
+                الصورة
+            </div>
+
+            <div class="control">
+
+                <label>السطوع</label>
+
+                <input
+                    id="brightness"
+                    type="range"
+                    min="50"
+                    max="150"
+                    value="100"
+                >
+
+            </div>
+
+            <div class="control">
+
+                <label>التباين</label>
+
+                <input
+                    id="contrast"
+                    type="range"
+                    min="50"
+                    max="150"
+                    value="100"
+                >
+
+            </div>
+
+            <div class="control">
+
+                <label>التشبع</label>
+
+                <input
+                    id="saturation"
+                    type="range"
+                    min="0"
+                    max="200"
+                    value="100"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="property-section">
+
+            <div class="property-heading">
+                الصوت
+            </div>
+
+            <div class="control">
+
+                <label>مستوى الصوت</label>
+
+                <input
+                    id="volume"
+                    type="range"
+                    min="0"
+                    max="100"
+                    value="100"
+                >
+
+            </div>
+
+        </div>
+
+    </aside>
 
 </main>
 
